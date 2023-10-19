@@ -12,5 +12,54 @@
 #define function withdraw(uint256) payable returns()
 
 #define macro MAIN() = takes(0) returns(0) {
+    0x00 calldataload 0xE0 shr
 
+    dup1 __FUNC_SIG(balanceOf) eq balanceOfJump jumpi
+    dup1 __FUNC_SIG(withdraw) eq withdrawJump jumpi
+
+    DEPOSIT()
+
+    balanceOfJump:
+        BALANCE_OF()
+    withdrawJump:
+        WITHDRAW()
+}
+
+#define macro DEPOSIT() = takes(0) returns(0) {
+    caller
+    sload
+    callvalue
+    add
+
+    caller
+    sstore
+
+    0x00 0x00 return
+}
+
+#define macro WITHDRAW() = takes(0) returns(0) {
+    0x04 calldataload
+    caller
+    sload
+
+    dup2 dup2 lt revertPoint jumpi
+
+    sub   
+    caller
+    sstore 
+
+    0x00 0x00 0x00 0x00 0x04 calldataload caller 0x5208 call
+
+    0x00 0x00 return
+
+    revertPoint:
+        0x00 0x00 revert
+}
+
+#define macro BALANCE_OF() = takes(0) returns(0) {
+    0x04 calldataload
+    sload
+
+    0x00 mstore
+    0x20 0x00 return
 }

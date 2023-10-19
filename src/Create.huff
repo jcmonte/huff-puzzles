@@ -13,5 +13,27 @@
 
 
  #define macro MAIN() = takes(0) returns(0) {
-    
+    0x00 calldataload 0xe0 shr
+
+    dup1 __FUNC_SIG(makeContract) eq makeContractJP jumpi
+
+    0x00 revert
+
+    makeContractJP:
+        STORE_INIT_CODE()
+        __tablesize(CODE_TABLE)
+        0x00
+        0x00 create
+        0x00 mstore
+        0x20 0x00 return
  }
+
+ #define macro STORE_INIT_CODE() = takes(0) returns(0) {
+    __tablesize(CODE_TABLE)
+    __tablestart(CODE_TABLE)
+    0x00 codecopy
+ }
+
+ #define table CODE_TABLE {
+    0x7f620caffe60005260206000f3000000000000000000000000000000000000000060005260206000f3
+}

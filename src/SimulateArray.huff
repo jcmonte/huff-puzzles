@@ -25,5 +25,89 @@
  #define error ZeroArray()
 
  #define macro MAIN() = takes(0) returns(0) {
-    
+    0x00 calldataload 0xe0 shr
+
+    dup1 __FUNC_SIG(pushh) eq pushhjp jumpi
+    dup1 __FUNC_SIG(popp) eq poppjp jumpi
+    dup1 __FUNC_SIG(read) eq readjp jumpi
+    dup1 __FUNC_SIG(length) eq lengthjp jumpi
+    dup1 __FUNC_SIG(write) eq writejp jumpi
+
+    error:
+        0x00 revert
+
+    zeroArray:
+        __ERROR(ZeroArray) 0x00 mstore
+        0x04 0x00 revert
+
+    oob:
+        __ERROR(OutOfBounds) 0x00 mstore
+        0x04 0x00 revert
+
+    pushhjp:
+        PUSH()
+    poppjp:
+        POP()
+    readjp:
+        READ()
+    lengthjp:
+        LENGTH()
+    writejp:
+        WRITE()
+ }
+
+  #define macro LENGTH() = takes(0) returns(0) {
+    0x00 sload
+    0x00 mstore
+    0x20 0x00 return
+ }
+
+ #define macro PUSH() = takes(0) returns(0) {
+    0x00 sload
+    0x01 add
+    dup1
+    0x00 sstore
+
+    0x04 calldataload
+    swap1
+    sstore
+
+    0x00 0x00 return
+ }
+
+  #define macro POP() = takes(0) returns(0) {
+    0x00 sload iszero zeroArray jumpi
+
+    0x00
+    0x00 sload
+    sstore
+
+    0x01
+    0x00 sload
+    sub
+    0x00 sstore
+
+    0x00 0x00 return
+ }
+
+ #define macro READ() = takes(0) returns(0) {
+    0x00 sload 0x04 calldataload 0x01 add gt oob jumpi
+
+    0x04 calldataload
+    0x01
+    add
+    sload
+
+    0x00 mstore
+    0x20 0x00 return
+ }
+
+ #define macro WRITE() = takes(0) returns(0) {
+    0x00 sload 0x04 calldataload 0x01 add gt oob jumpi
+
+    0x24 calldataload
+    0x04 calldataload 0x01 add
+    sstore
+
+    0x20 0x00 return
  }

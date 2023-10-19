@@ -12,5 +12,41 @@
 
 
 #define macro MAIN() = takes(0) returns(0) {
+    0x0 calldataload 0xe0 shr
 
+    __FUNC_SIG(sumArray) eq jpSumArray jumpi
+
+    0x0 revert
+
+    jpSumArray:
+        0x04 calldataload // [offset]
+        CALLDATALOAD_SELECTOR_OFFSET() // [size]
+        dup1 0x00 eq jpReturn jumpi // check 0 size case
+        0x00 mstore // []
+
+        0x00 // [sum]
+        jpLoop:
+        0x04 calldataload // [offset, current sum]
+        0x20 add // [array start, current sum]
+        0x00 mload // [remaining size, array start, current sum]
+        0x01 swap1 sub // [remaining size - 1, array start, current sum] *note array_index starts from the back
+        0x20 mul // [remaining size - 1 * 32 bytes, array start, current sum]
+        add // [expected calldata location, current sum]
+
+        CALLDATALOAD_SELECTOR_OFFSET() // [array[i_bytes], current sum]
+        add // [new sum]
+
+        0x00 // [0, new sum]
+        0x00 mload // [remaining size, 0, new sum]
+        0x01 swap1 sub // [remaining size - 1, 0, new sum]
+        dup1 0x00 mstore // [remaining size - 1, 0, new sum]
+        gt jpLoop jumpi // [new sum]
+
+        jpReturn:
+        0x00 mstore // []
+        0x20 0x00 return
+}
+
+#define macro CALLDATALOAD_SELECTOR_OFFSET() = takes(1) returns(1) {
+    0x04 add calldataload
 }

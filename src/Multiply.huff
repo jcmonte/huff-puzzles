@@ -13,5 +13,35 @@
 
 
 #define macro MAIN() = takes(0) returns(0) {
+    0x00 calldataload 0xE0 shr
 
+    __FUNC_SIG(multiply) eq mulJP jumpi
+
+    revertJP:
+        0x00 0x00 revert
+
+    mulJP:
+        0x04 calldataload
+        0x24 calldataload
+        dup2 dup2
+        mul
+
+        CHECK_OVERFLOW()        
+
+        returnJP:
+            0x00 mstore
+            0x20 0x00 return
+}
+
+#define macro CHECK_OVERFLOW() = takes(0) returns(0) {
+    swap1 0x00 eq returnJP jumpi
+    swap1 0x00 eq returnJP jumpi
+
+    0x04 calldataload
+    dup2
+    lt revertJP jumpi
+
+    0x24 calldataload
+    dup2
+    lt revertJP jumpi
 }

@@ -12,5 +12,19 @@
 
 
  #define macro MAIN() = takes(0) returns(0) {
-    
+    0x00 calldataload 0xe0 shr
+
+    dup1 __FUNC_SIG(sendEther) eq sendEtherJP jumpi
+
+    0x00 revert
+
+    sendEtherJP:
+        0x00
+        0x00
+        0x00
+        0x00
+        callvalue
+        0x04 calldataload
+        0x5208 
+        call 
  }
